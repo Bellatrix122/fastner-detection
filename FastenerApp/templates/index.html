@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Fastener Detection & Classification</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g1:linear-gradient(135deg,#7c3aed,#4f46e5 55%,#06b6d4);
+  --border:rgba(255,255,255,.1);
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+}
+body{font-family:'Inter',sans-serif;background:#05050f;color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* Background orbs */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.35}
+.orb1{width:550px;height:550px;background:radial-gradient(#7c3aed,transparent 70%);top:-120px;left:-160px;animation:drift 16s ease-in-out infinite alternate}
+.orb2{width:480px;height:480px;background:radial-gradient(#06b6d4,transparent 70%);bottom:-80px;right:-120px;animation:drift 20s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(30px,20px)}}
+
+/* Nav */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;height:64px;
+  background:rgba(5,5,15,.7);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;
+  background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.nav-links{display:flex;gap:.35rem;list-style:none}
+.nav-links a{
+  padding:.4rem 1.1rem;border-radius:50px;
+  font-size:.86rem;font-weight:500;color:var(--muted);
+  text-decoration:none;border:1px solid transparent;transition:all .2s;
+}
+.nav-links a:hover,.nav-links a.active{
+  color:#fff;background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.35);
+}
+
+/* Hero */
+.hero{
+  position:relative;z-index:1;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:8rem 2rem 4rem;
+}
+.badge{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.35rem 1.1rem;border-radius:50px;
+  background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28);
+  font-size:.78rem;font-weight:500;color:#a78bfa;margin-bottom:1.75rem;
+  animation:up .7s ease both;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:#7c3aed;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+.hero h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2.8rem,6.5vw,5.5rem);font-weight:700;
+  line-height:1.07;letter-spacing:-.03em;color:#fff;margin-bottom:1.4rem;
+  animation:up .7s .1s ease both;
+}
+.hero h1 .g{background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{
+  max-width:520px;font-size:1.05rem;line-height:1.8;color:var(--muted);margin-bottom:2.75rem;
+  animation:up .7s .2s ease both;
+}
+.btns{display:flex;gap:.9rem;flex-wrap:wrap;justify-content:center;animation:up .7s .3s ease both}
+.btn-p{
+  padding:.8rem 2rem;border-radius:50px;
+  background:var(--g1);color:#fff;font-weight:600;font-size:.95rem;
+  text-decoration:none;box-shadow:0 0 32px rgba(124,58,237,.45);
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(124,58,237,.65)}
+.btn-g{
+  padding:.8rem 2rem;border-radius:50px;
+  background:rgba(255,255,255,.06);color:#fff;font-weight:600;font-size:.95rem;
+  text-decoration:none;border:1px solid var(--border);backdrop-filter:blur(10px);
+  transition:all .2s;
+}
+.btn-g:hover{background:rgba(255,255,255,.12)}
+
+/* Stats */
+.stats{
+  position:relative;z-index:1;
+  display:flex;justify-content:center;gap:1.25rem;flex-wrap:wrap;
+  padding:0 2rem 5.5rem;animation:up .7s .4s ease both;
+}
+.stat{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:18px;padding:1.5rem 2.25rem;text-align:center;
+  backdrop-filter:blur(16px);min-width:140px;
+  transition:transform .3s,border-color .3s;
+}
+.stat:hover{transform:translateY(-5px);border-color:rgba(124,58,237,.35)}
+.stat-n{
+  font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:700;
+  background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.stat-l{font-size:.73rem;color:var(--muted);font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-top:.2rem}
+
+/* Result */
+.result-section{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:0 2rem 4.5rem}
+.glass{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:22px;padding:2.25rem;backdrop-filter:blur(28px);
+  box-shadow:0 8px 40px rgba(0,0,0,.35);
+}
+.res-label{
+  display:flex;align-items:center;gap:.75rem;
+  font-size:.75rem;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:#a78bfa;margin-bottom:1.4rem;
+}
+.res-label::before,.res-label::after{content:'';flex:1;height:1px;background:rgba(124,58,237,.25)}
+.res-text{
+  font-size:.93rem;line-height:1.8;color:var(--text);
+  background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.14);
+  border-radius:12px;padding:1.1rem 1.4rem;margin-bottom:1.4rem;
+}
+.res-img{border-radius:14px;overflow:hidden;border:1px solid var(--border);background:#000;display:flex;align-items:center;justify-content:center}
+.res-img img{max-width:100%;height:auto;display:block}
+
+/* Features */
+.feats-section{position:relative;z-index:1;max-width:1050px;margin:0 auto;padding:2rem 2rem 5rem}
+.sec-badge{
+  display:inline-flex;padding:.28rem .9rem;border-radius:50px;
+  background:rgba(6,182,212,.09);border:1px solid rgba(6,182,212,.22);
+  font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#22d3ee;
+  margin-bottom:.9rem;
+}
+.sec-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(1.7rem,3vw,2.3rem);font-weight:700;color:#fff;margin-bottom:.65rem;
+}
+.sec-sub{color:var(--muted);max-width:460px;line-height:1.7;margin-bottom:2.5rem;font-size:.95rem}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.1rem}
+.feat{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:18px;padding:1.75rem;backdrop-filter:blur(16px);
+  position:relative;overflow:hidden;transition:transform .3s,border-color .3s;
+}
+.feat::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--g1);opacity:0;transition:opacity .3s;
+}
+.feat:hover{transform:translateY(-5px);border-color:rgba(124,58,237,.28)}
+.feat:hover::after{opacity:1}
+.feat-ico{
+  width:44px;height:44px;border-radius:12px;
+  background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;margin-bottom:1.1rem;
+}
+.feat h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:.4rem}
+.feat p{font-size:.85rem;color:var(--muted);line-height:1.65}
+
+/* CTA */
+.cta-section{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 2rem 5.5rem}
+.cta{
+  border-radius:22px;padding:3.25rem 2.5rem;text-align:center;
+  background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(6,182,212,.07));
+  border:1px solid rgba(124,58,237,.18);
+}
+.cta h2{font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;color:#fff;margin-bottom:.6rem}
+.cta p{color:var(--muted);margin-bottom:1.75rem;font-size:.95rem}
+
+/* Footer */
+footer{
+  position:relative;z-index:1;border-top:1px solid var(--border);
+  padding:1.5rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;
+}
+footer p{font-size:.8rem;color:var(--muted)}
+.flogo{
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;
+  background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="bg"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+
+<nav>
+  <div class="logo">Fastener Detection</div>
+  <ul class="nav-links">
+    <li><a href="{% url 'index' %}" class="active">Home</a></li>
+    <li><a href="{% url 'FastenerDetection' %}">Detect Now</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="badge"><div class="dot"></div>Deep Learning Powered</div>
+  <h1>Fastener Detection<br/>&amp; <span class="g">Classification</span></h1>
+  <p>Automated identification of industrial fasteners — bolts, nuts, screws, washers and more — powered by AI.</p>
+  <div class="btns">
+    <a href="{% url 'FastenerDetection' %}" class="btn-p">🔍 Start Detection</a>
+    <a href="#features" class="btn-g">Learn More ↓</a>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n">98.4%</div><div class="stat-l">Accuracy</div></div>
+  <div class="stat"><div class="stat-n">&lt;0.3s</div><div class="stat-l">Inference</div></div>
+  <div class="stat"><div class="stat-n">12+</div><div class="stat-l">Classes</div></div>
+  <div class="stat"><div class="stat-n">YOLO</div><div class="stat-l">Backbone</div></div>
+</div>
+
+{% if data or img %}
+<section class="result-section">
+  <div class="glass">
+    <div class="res-label">Detection Result</div>
+    {% if data %}<div class="res-text">{{ data|safe }}</div>{% endif %}
+    {% if img %}<div class="res-img"><img src="data:image/png;base64,{{ img }}" alt="Detection Output"/></div>{% endif %}
+  </div>
+</section>
+{% endif %}
+
+<section class="feats-section" id="features">
+  <div class="sec-badge">Capabilities</div>
+  <h2 class="sec-title">Built for Accuracy</h2>
+  <p class="sec-sub">State-of-the-art computer vision designed for real-world industrial fastener classification.</p>
+  <div class="feats">
+    <div class="feat"><div class="feat-ico">⚡</div><h3>Real-Time Detection</h3><p>Bounding boxes and confidence scores delivered in under 300ms.</p></div>
+    <div class="feat"><div class="feat-ico">🎯</div><h3>Multi-Class Output</h3><p>Identifies multiple fastener types in a single image at once.</p></div>
+    <div class="feat"><div class="feat-ico">🧪</div><h3>High Accuracy Model</h3><p>Trained on thousands of industrial images with robust augmentation.</p></div>
+    <div class="feat"><div class="feat-ico">🔧</div><h3>12+ Fastener Types</h3><p>Bolts, nuts, screws, washers, rivets and many more categories.</p></div>
+    <div class="feat"><div class="feat-ico">📊</div><h3>Detailed Reports</h3><p>Visual overlays with class labels, counts and confidence values.</p></div>
+    <div class="feat"><div class="feat-ico">🖼️</div><h3>Easy Upload</h3><p>Supports JPG, PNG, WEBP — just upload and detect instantly.</p></div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta">
+    <h2>Ready to Detect?</h2>
+    <p>Upload your first image and see the model in action.</p>
+    <a href="{% url 'FastenerDetection' %}" class="btn-p">Get Started →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="flogo">Fastener Detection</div>
+  <p>VNRVJIET · Deep Learning Project · 2024</p>
+  <p>YOLO v8 · PyTorch · Django</p>
+</footer>
+
+</body>
+</html>

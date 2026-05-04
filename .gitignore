@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+staticfiles/
+media/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Dataset - too large for GitHub
+DataUpload/
+DataUpload.rar
+Fastener/          # dataset folder (not the Django project folder)
+testImages/
+
+# Model weights - commit only if < 100MB, else use Option B below
+# model/*.pt       # uncomment this line if your .pt is > 100MB
+
+# Environment
+.env
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Word docs / screenshots (not needed for deploy)
+*.docx
+SCREENS*
+Web_Output*

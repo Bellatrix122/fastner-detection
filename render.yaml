@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fastener-detection-app
+    runtime: python
+    buildCommand: bash build.sh
+    startCommand: gunicorn Fastener.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true        # Render auto-generates a secure key
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.10.0"
+    disk:
+      name: model-storage
+      mountPath: /opt/render/project/src/model
+      sizeGB: 1                    # stores your .pt model file persistently
